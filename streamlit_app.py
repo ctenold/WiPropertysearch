@@ -5,7 +5,6 @@ import io
 # from folium import Map, Marker
 # from streamlit_folium import st_folium
 
-
 # API endpoint
 API_URL = "https://services3.arcgis.com/n6uYoouQZW75n5WI/arcgis/rest/services/Wisconsin_Statewide_Parcels/FeatureServer/0/query"
 
@@ -85,6 +84,7 @@ def main():
     # Acreage filter
     st.subheader("Optional Acreage Filter")
     min_acres = st.number_input("Minimum GIS Acres (leave as 0 for no filter)", min_value=0.0, step=0.1, value=0.0)
+    max_acres = st.number_input("Maximum GIS Acres (leave as 0 for no filter)", min_value=0.0, step=0.1, value=0.0)
 
     # Construct WHERE clause
     where_conditions = []
@@ -94,7 +94,9 @@ def main():
         else:
             where_conditions.append(f"{search_field} LIKE '%{search_value}%'")
     if min_acres > 0:
-        where_conditions.append(f"GISACRES > {min_acres}")
+        where_conditions.append(f"GISACRES >= {min_acres}")
+    if max_acres > 0:
+        where_conditions.append(f"GISACRES <= {max_acres}")
     
     # Combine conditions or use default
     if where_conditions:
@@ -107,7 +109,7 @@ def main():
 
     # Fields to Return
     st.subheader("Fields to Return")
-    selected_fields = st.multiselect("Select Fields", AVAILABLE_FIELDS, default=['PARCELID', 'OWNERNME1', 'OWNERNME2', 'PSTLADRESS', 'SITEADRESS', 'ZIPCODE', 'SCHOOLDIST', 'CNTASSDVALUE', 'LNDVALUE', 'IMPVALUE', 'MFLVALUE', 'ESTFMKVALUE', 'NETPRPTA', 'GRSPRPTA', 'PROPCLASS', 'AUXCLASS', 'ASSDACRES', 'DEEDACRES', 'GISACRES', 'CONAME', 'LOADDATE', 'LONGITUDE', 'LATITUDE'])#["OWNERNME1", "PARCELID", "SITEADRESS", "GISACRES"])
+    selected_fields = st.multiselect("Select Fields", AVAILABLE_FIELDS, default=['PARCELID', 'OWNERNME1', 'OWNERNME2', 'PSTLADRESS', 'SITEADRESS', 'ZIPCODE', 'SCHOOLDIST', 'CNTASSDVALUE', 'LNDVALUE', 'IMPVALUE', 'MFLVALUE', 'ESTFMKVALUE', 'NETPRPTA', 'GRSPRPTA', 'PROPCLASS', 'AUXCLASS', 'ASSDACRES', 'DEEDACRES', 'GISACRES', 'CONAME', 'LOADDATE', 'LONGITUDE', 'LATITUDE'])
 
     # Button to Execute Query
     if st.button("Search"):
@@ -128,17 +130,11 @@ def main():
                     # Generate Google Maps links
                     df["Google Maps Link"] = df.apply(lambda row: generate_google_maps_link(row["LATITUDE"], row["LONGITUDE"]), axis=1)
                     
-                    # # Create a clickable hyperlink column for Streamlit
-                    # df["Google Maps"] = df["Google Maps Link"].apply(lambda x: f'<a href="{x}" target="_blank">View on Map</a>' if x else "")
-                    
-                    # # Filter to only selected fields plus the link column (exclude raw link in display)
-                    # display_fields = selected_fields + ["Google Maps"]
-                    # df_display = df[display_fields]
                     num_results = len(df)
-                    if num_results >=2000:
-                      st.write("Displaying only the first 2000 results")
+                    if num_results >= 2000:
+                        st.write("Displaying only the first 2000 results")
                     else:
-                      st.write(f"{num_results} Results")
+                        st.write(f"{num_results} Results")
                     # Render the table with clickable links
                     st.dataframe(df)
 
