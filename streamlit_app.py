@@ -135,7 +135,7 @@ def main():
                     # display_fields = selected_fields + ["Google Maps"]
                     # df_display = df[display_fields]
                     num_results = len(df)
-                    if num_results >=2000
+                    if num_results >=2000:
                       st.write("Displaying only the first 2000 results")
                     else:
                       st.write(f"{num_results} Results")
