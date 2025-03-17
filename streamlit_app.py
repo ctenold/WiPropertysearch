@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 import io
-from folium import Map, Marker
+# from folium import Map, Marker
 # from streamlit_folium import st_folium
 
 
